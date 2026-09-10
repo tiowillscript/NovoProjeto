@@ -17,10 +17,22 @@ jobs:
       - name: Baixar codigo
         uses: actions/checkout@v4
 
-      - name: Restaurar projeto completo
+      - name: Restaurar e validar projeto completo
         run: |
           mkdir -p full_src
-          cat payload/part-*.b64 | base64 -d > full_src/aula_facil.zip
+          cat \
+            payload/part-00.b64 \
+            payload5k/part-004.b64 \
+            payload5k/part-005.b64 \
+            payload5k/part-006.b64 \
+            payload5k/part-007.b64 \
+            payload/part-02.b64 \
+            payload/part-03.b64 \
+            payload/part-04.b64 \
+            payload/part-05.b64 \
+            | base64 -d > full_src/aula_facil.zip
+          echo 'c6c2f72f58c24e6f049f728c9eb8b9d79ed0029c97e649d419a8b022287f4d7a  full_src/aula_facil.zip' | sha256sum -c -
+          unzip -t full_src/aula_facil.zip
           cd full_src
           unzip -q aula_facil.zip
           test -f aula_facil/pubspec.yaml
