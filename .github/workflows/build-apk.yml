@@ -37,6 +37,13 @@ jobs:
           unzip -q aula_facil.zip
           test -f aula_facil/pubspec.yaml
 
+      - name: Aplicar Aula Facil 1.1
+        run: |
+          tar -xzf patch_v11.tar.gz -C full_src/aula_facil
+          grep -n '^version:' full_src/aula_facil/pubspec.yaml
+          test -f full_src/aula_facil/lib/screens/student_home_screen.dart
+          test -f full_src/aula_facil/lib/services/cloud_class_service.dart
+
       - name: Configurar Java
         uses: actions/setup-java@v4
         with:
@@ -80,12 +87,18 @@ jobs:
 
       - name: Gerar APK release
         working-directory: full_src/aula_facil
-        run: flutter build apk --release
+        run: |
+          flutter build apk --release \
+            --dart-define=FIREBASE_API_KEY='${{ vars.FIREBASE_API_KEY }}' \
+            --dart-define=FIREBASE_APP_ID='${{ vars.FIREBASE_APP_ID }}' \
+            --dart-define=FIREBASE_MESSAGING_SENDER_ID='${{ vars.FIREBASE_MESSAGING_SENDER_ID }}' \
+            --dart-define=FIREBASE_PROJECT_ID='${{ vars.FIREBASE_PROJECT_ID }}' \
+            --dart-define=FIREBASE_STORAGE_BUCKET='${{ vars.FIREBASE_STORAGE_BUCKET }}'
 
       - name: Publicar APK
         uses: actions/upload-artifact@v4
         with:
-          name: aula-facil-apk
+          name: aula-facil-1-1-apk
           path: full_src/aula_facil/build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
           retention-days: 30
