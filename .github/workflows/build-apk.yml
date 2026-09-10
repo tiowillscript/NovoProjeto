@@ -62,6 +62,14 @@ jobs:
         working-directory: full_src/aula_facil
         run: flutter pub get
 
+      - name: Compatibilidade Android API 36
+        working-directory: full_src/aula_facil
+        run: |
+          FILE_PICKER_GRADLE=$(find "$PUB_CACHE/hosted" -path '*/file_picker-8.3.7/android/build.gradle' -print -quit)
+          test -n "$FILE_PICKER_GRADLE"
+          sed -i 's/compileSdk 34/compileSdk 36/' "$FILE_PICKER_GRADLE"
+          grep -n 'compileSdk' "$FILE_PICKER_GRADLE"
+
       - name: Analisar codigo
         working-directory: full_src/aula_facil
         run: flutter analyze --no-fatal-infos
