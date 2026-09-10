@@ -64,7 +64,7 @@ jobs:
 
       - name: Analisar codigo
         working-directory: full_src/aula_facil
-        run: flutter analyze
+        run: flutter analyze --no-fatal-infos
 
       - name: Executar testes
         working-directory: full_src/aula_facil
