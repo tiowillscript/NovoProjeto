@@ -39,7 +39,10 @@ jobs:
 
       - name: Aplicar Aula Facil 1.1
         run: |
-          tar -xzf patch_v11.tar.gz -C full_src/aula_facil
+          cat patch_v11_parts/part-*.b64 | base64 -d > patch_v11_fixed.tar.gz
+          echo '2d32a047013853e742992eb9150d2ca1b356918bf5e7137cb4b7e95bb7fd67d4  patch_v11_fixed.tar.gz' | sha256sum -c -
+          tar -tzf patch_v11_fixed.tar.gz >/dev/null
+          tar -xzf patch_v11_fixed.tar.gz -C full_src/aula_facil
           grep -n '^version:' full_src/aula_facil/pubspec.yaml
           test -f full_src/aula_facil/lib/screens/student_home_screen.dart
           test -f full_src/aula_facil/lib/services/cloud_class_service.dart
