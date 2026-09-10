@@ -12,39 +12,60 @@ jobs:
   build-android:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+
     steps:
-      - name: Checkout
+      - name: Baixar codigo
         uses: actions/checkout@v4
 
-      - name: Java 17
+      - name: Restaurar projeto completo
+        run: |
+          mkdir -p full_src
+          cat payload/part-*.b64 | base64 -d > full_src/aula_facil.zip
+          cd full_src
+          unzip -q aula_facil.zip
+          test -f aula_facil/pubspec.yaml
+
+      - name: Configurar Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Flutter 3.47
+      - name: Configurar Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.47.0'
+          flutter-version: '3.47.2'
           channel: stable
           cache: true
 
-      - name: Criar projeto Android
+      - name: Criar shell Android
+        working-directory: full_src/aula_facil
         run: flutter create . --platforms=android --org com.willian.aulafacil --project-name aula_facil
 
-      - name: Nome do aplicativo
-        run: sed -i 's/android:label="aula_facil"/android:label="Aula Fácil"/' android/app/src/main/AndroidManifest.xml
+      - name: Aplicar configuracao Android
+        working-directory: full_src/aula_facil
+        run: python3 tool/prepare_android_ci.py
 
-      - name: Dependencias
+      - name: Instalar dependencias
+        working-directory: full_src/aula_facil
         run: flutter pub get
 
+      - name: Analisar codigo
+        working-directory: full_src/aula_facil
+        run: flutter analyze
+
+      - name: Executar testes
+        working-directory: full_src/aula_facil
+        run: flutter test
+
       - name: Gerar APK release
+        working-directory: full_src/aula_facil
         run: flutter build apk --release
 
       - name: Publicar APK
         uses: actions/upload-artifact@v4
         with:
           name: aula-facil-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: full_src/aula_facil/build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
           retention-days: 30
